@@ -5,12 +5,16 @@ import {
     NativeModules,
     requireNativeComponent,
     StyleSheet,
+    Platform,
     FlexStyle,
     LayoutChangeEvent,
     ShadowStyleIOS,
     StyleProp,
     TransformsStyle,
+    ImageRequireSource,
 } from 'react-native'
+
+const isAndroid = Platform.OS === 'android'
 
 const FastImageViewNativeModule = NativeModules.FastImageView
 
@@ -79,7 +83,8 @@ export interface ImageStyle extends FlexStyle, TransformsStyle, ShadowStyleIOS {
 }
 
 export interface FastImageProps {
-    source: Source | number
+    source: Source | ImageRequireSource
+    defaultSource?: ImageRequireSource
     resizeMode?: ResizeMode
     fallback?: boolean
 
@@ -129,6 +134,7 @@ export interface FastImageProps {
 
 function FastImageBase({
     source,
+    defaultSource,
     tintColor,
     onLoadStart,
     onProgress,
@@ -144,6 +150,33 @@ function FastImageBase({
 }: FastImageProps & { forwardedRef: React.Ref<any> }) {
     const resolvedSource = Image.resolveAssetSource(source as any)
 
+    let resolvedDefaultSource:
+        | ImageRequireSource
+        | string
+        | null
+
+    if (!defaultSource) {
+        resolvedDefaultSource = null
+    } else {
+        if (isAndroid) {
+            // Android receives a URI string, and resolves into a Drawable using RN's methods
+            const resolved = Image.resolveAssetSource(defaultSource as ImageRequireSource)
+
+            if (resolved) {
+                resolvedDefaultSource = resolved.uri
+            } else {
+                resolvedDefaultSource = null
+            }
+        } else /* iOS or other number mapped assets */ {
+            // In iOS the number is passed, and bridged automatically into a UIImage
+            resolvedDefaultSource = defaultSource
+        }
+    }
+
+    if ((tintColor === null || tintColor === undefined) && style) {
+        tintColor = StyleSheet.flatten(style).tintColor
+    }
+
     if (fallback) {
         return (
             <View style={[styles.imageContainer, style]} ref={forwardedRef}>
@@ -151,6 +184,7 @@ function FastImageBase({
                     {...props}
                     style={StyleSheet.absoluteFill}
                     source={resolvedSource}
+                    defaultSource={defaultSource}
                     onLoadStart={onLoadStart}
                     onProgress={onProgress}
                     onLoad={onLoad as any}
@@ -170,6 +204,7 @@ function FastImageBase({
                 tintColor={tintColor}
                 style={StyleSheet.absoluteFill}
                 source={resolvedSource}
+                defaultSource={resolvedDefaultSource}
                 onFastImageLoadStart={onLoadStart}
                 onFastImageProgress={onProgress}
                 onFastImageLoad={onLoad}
