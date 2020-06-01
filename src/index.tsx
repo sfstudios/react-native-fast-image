@@ -14,12 +14,7 @@ import {
 
 const FastImageViewNativeModule = NativeModules.FastImageView
 
-export type ResizeMode = 'contain' | 'cover' | 'stretch' | 'center'
-
-export type ResizeImageAndroid = {
-    width: number
-    height: number
-}
+type ResizeMode = 'contain' | 'cover' | 'stretch' | 'center'
 
 const resizeMode = {
     contain: 'contain',
@@ -86,7 +81,6 @@ export interface ImageStyle extends FlexStyle, TransformsStyle, ShadowStyleIOS {
 export interface FastImageProps {
     source: Source | number
     resizeMode?: ResizeMode
-    resizeImageAndroid?: ResizeImageAndroid
     fallback?: boolean
 
     onLoadStart?(): void
