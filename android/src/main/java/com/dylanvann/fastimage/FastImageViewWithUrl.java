@@ -6,6 +6,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -118,6 +119,7 @@ class FastImageViewWithUrl extends ImageView {
                     .load(imageSource == null ? null : imageSource.getSourceForLoad())
                     .apply(FastImageViewConverter
                             .getOptions(context, imageSource, mSource)
+                            .format(DecodeFormat.PREFER_RGB_565)
                             .placeholder(mDefaultSource) // show until loaded
                             .fallback(mDefaultSource)); // null will not be treated as error              
 
